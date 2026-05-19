@@ -357,7 +357,7 @@ img{display:block}button{font-family:inherit}
   <div class="sugg-form">
     <div class="sugg-form-title">💡 Write a suggestion</div>
     
-    <form name="tan-suggestions" method="POST" data-netlify="true" id="suggestion-form">
+    <form name="tan-suggestions" method="POST" data-netlify="true" id="suggestion-form" onsubmit="submitSuggestion(event)">
       <input type="hidden" name="form-name" value="tan-suggestions" />
       
       <input class="sugg-name-input" name="name" type="text" placeholder="Your name (optional)" maxlength="40" autocomplete="off">
@@ -1188,10 +1188,11 @@ function clearSearch(){$("search-input").value="";$("search-input").dispatchEven
 
 /* ── SUGGESTIONS (Personal History) ── */
 
-async function submitSuggestion() {
+async function submitSuggestion(e) {
+  e.preventDefault();   // ← THIS IS THE MOST IMPORTANT LINE
+  
   const form = document.getElementById('suggestion-form');
-  const messageInput = form.querySelector('textarea[name="message"]');
-  const message = messageInput.value.trim();
+  const message = form.querySelector('textarea[name="message"]').value.trim();
   
   if (!message) {
     toast("Please write a suggestion first");
@@ -1212,12 +1213,15 @@ async function submitSuggestion() {
     } else {
       toast("Failed to submit. Please try again.");
     }
-  } catch (e) {
-    console.error(e);
-    toast("⚠️ Could not submit. Check your internet.");
+  } catch (err) {
+    console.error(err);
+    // Still save locally even if Netlify fails (better UX)
+    saveMySuggestion(message);
+    form.reset();
+    toast("✅ Saved locally! (Will reach me when online)");
+    renderMySuggestions();
   }
 }
-
 // Save suggestion locally
 function saveMySuggestion(message) {
   let mySuggs = JSON.parse(localStorage.getItem("mySuggestions") || "[]");
