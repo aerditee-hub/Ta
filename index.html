@@ -357,14 +357,16 @@ img{display:block}button{font-family:inherit}
   <div class="sugg-form">
     <div class="sugg-form-title">💡 Write a suggestion</div>
     
-    <form name="tan-suggestions" method="POST" data-netlify="true" id="suggestion-form" onsubmit="submitSuggestion(event)">
-      <input type="hidden" name="form-name" value="tan-suggestions" />
-      
+    <form action="https://api.web3forms.com/submit" method="POST" id="suggestion-form" onsubmit="submitSuggestion(event)">
+      <input type="hidden" name="access_key" value="f9f434b4-8830-4d66-9749-a4b6e77b17fc">
+      <input type="hidden" name="subject" value="New TAN Music Suggestion">
+      <input type="hidden" name="from_name" value="TAN Music App">
+
       <input class="sugg-name-input" name="name" type="text" placeholder="Your name (optional)" maxlength="40" autocomplete="off">
       <textarea class="sugg-text-input" name="message" placeholder="Suggest a song, artist, or anything else…" maxlength="500" required></textarea>
       
       <input type="text" name="bot-field" style="display:none;" />
-      
+
       <button class="sugg-submit" type="submit">Submit Suggestion</button>
     </form>
   </div>
@@ -1201,7 +1203,7 @@ async function submitSuggestion(e) {
   }
 
   try {
-    const response = await fetch('/', {
+    const response = await fetch('https://api.web3forms.com/submit', {
       method: 'POST',
       body: new FormData(form)
     });
@@ -1209,14 +1211,14 @@ async function submitSuggestion(e) {
     if (response.ok) {
       saveMySuggestion(message);
       form.reset();
-      toast("✅ Suggestion submitted successfully! Thank you ❤️");
+      toast("✅ Suggestion sent successfully! Thank you ❤️");
       renderMySuggestions();
     } else {
-      toast("Failed to submit. Please try again.");
+      toast("Failed to send. Please try again.");
     }
   } catch (err) {
     console.error(err);
-    saveMySuggestion(message);   // Save locally even if network fails
+    saveMySuggestion(message);
     form.reset();
     toast("✅ Saved locally! Thank you");
     renderMySuggestions();
