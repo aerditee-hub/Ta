@@ -371,6 +371,7 @@ img{display:block}button{font-family:inherit}
 
   <div class="sugg-list-head">
     <span class="sugg-list-title">My Suggestions</span>
+    <button class="sugg-clear-btn" onclick="clearMySuggestions()">Clear all</button>
   </div>
   <div id="my-suggestions-list"></div>
 </div>
@@ -1189,7 +1190,7 @@ function clearSearch(){$("search-input").value="";$("search-input").dispatchEven
 /* ── SUGGESTIONS (Personal History) ── */
 
 async function submitSuggestion(e) {
-  e.preventDefault();   // ← THIS IS THE MOST IMPORTANT LINE
+  e.preventDefault();
   
   const form = document.getElementById('suggestion-form');
   const message = form.querySelector('textarea[name="message"]').value.trim();
@@ -1215,29 +1216,27 @@ async function submitSuggestion(e) {
     }
   } catch (err) {
     console.error(err);
-    // Still save locally even if Netlify fails (better UX)
-    saveMySuggestion(message);
+    saveMySuggestion(message);   // Save locally even if network fails
     form.reset();
-    toast("✅ Saved locally! (Will reach me when online)");
+    toast("✅ Saved locally! Thank you");
     renderMySuggestions();
   }
 }
 // Save suggestion locally
+// Save user's suggestion
 function saveMySuggestion(message) {
   let mySuggs = JSON.parse(localStorage.getItem("mySuggestions") || "[]");
   mySuggs.unshift({
     text: message,
     time: Date.now()
   });
-  mySuggs = mySuggs.slice(0, 20); // keep last 20
+  mySuggs = mySuggs.slice(0, 30); // keep last 30
   localStorage.setItem("mySuggestions", JSON.stringify(mySuggs));
 }
 
-// Render My Suggestions
+// Render suggestions
 function renderMySuggestions() {
   const container = document.getElementById("my-suggestions-list");
-  if (!container) return;
-
   const suggs = JSON.parse(localStorage.getItem("mySuggestions") || "[]");
   
   if (suggs.length === 0) {
@@ -1267,6 +1266,15 @@ function renderMySuggestions() {
   });
   
   container.innerHTML = html;
+}
+
+// Clear my suggestions
+function clearMySuggestions() {
+  if (!confirm("Clear all your suggestions?")) return;
+  
+  localStorage.removeItem("mySuggestions");
+  renderMySuggestions();
+  toast("🗑️ My suggestions cleared");
 }
 
 /* ── GREETING ── */
