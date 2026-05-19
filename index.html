@@ -1192,23 +1192,27 @@ function saveSuggestions(arr) { try{localStorage.setItem("tanSuggestions",JSON.s
 
 async function submitSuggestion() {
   const form = document.getElementById('suggestion-form');
-  const formData = new FormData(form);
-  
+  if (!form) {
+    toast("Form not found. Refresh the page.");
+    return;
+  }
+
   try {
     const response = await fetch('/', {
       method: 'POST',
-      body: formData
+      body: new FormData(form)
     });
-    
+
     if (response.ok) {
       form.reset();
-      toast("✅ Suggestion submitted! Thank you!");
-      // Optionally show a success message
+      toast("✅ Suggestion submitted successfully! Thank you ❤️");
     } else {
-      toast("Error submitting. Try again.");
+      console.error("Form submission failed:", response.status);
+      toast("Failed to submit. Please try again.");
     }
-  } catch(e) {
-    toast("Error submitting. Check your connection.");
+  } catch (e) {
+    console.error("Fetch error:", e);
+    toast("⚠️ Could not connect. Check your internet or refresh the page.");
   }
 }
 
