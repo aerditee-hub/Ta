@@ -1186,13 +1186,12 @@ function clearSearch(){$("search-input").value="";$("search-input").dispatchEven
   $("cat-grid").appendChild(d);
 });
 
-/* ── SUGGESTIONS ── */
-function getSuggestions() { try{return JSON.parse(localStorage.getItem("tanSuggestions")||"[]");}catch(e){return[];} }
-function saveSuggestions(arr) { try{localStorage.setItem("tanSuggestions",JSON.stringify(arr));}catch(e){} }
+/* ── SUGGESTIONS (Personal History) ── */
 
 async function submitSuggestion() {
   const form = document.getElementById('suggestion-form');
-  const message = form.querySelector('textarea[name="message"]').value.trim();
+  const messageInput = form.querySelector('textarea[name="message"]');
+  const message = messageInput.value.trim();
   
   if (!message) {
     toast("Please write a suggestion first");
@@ -1206,15 +1205,9 @@ async function submitSuggestion() {
     });
 
     if (response.ok) {
-      // Save to local history
       saveMySuggestion(message);
-      
-      // Reset form
       form.reset();
-      
       toast("✅ Suggestion submitted successfully! Thank you ❤️");
-      
-      // Refresh the list
       renderMySuggestions();
     } else {
       toast("Failed to submit. Please try again.");
@@ -1224,23 +1217,23 @@ async function submitSuggestion() {
     toast("⚠️ Could not submit. Check your internet.");
   }
 }
-// Save user's own suggestion locally
+
+// Save suggestion locally
 function saveMySuggestion(message) {
   let mySuggs = JSON.parse(localStorage.getItem("mySuggestions") || "[]");
-  
   mySuggs.unshift({
     text: message,
     time: Date.now()
   });
-  
-  // Keep only last 20 suggestions
-  mySuggs = mySuggs.slice(0, 20);
+  mySuggs = mySuggs.slice(0, 20); // keep last 20
   localStorage.setItem("mySuggestions", JSON.stringify(mySuggs));
 }
 
-// Render personal suggestions
+// Render My Suggestions
 function renderMySuggestions() {
   const container = document.getElementById("my-suggestions-list");
+  if (!container) return;
+
   const suggs = JSON.parse(localStorage.getItem("mySuggestions") || "[]");
   
   if (suggs.length === 0) {
@@ -1257,7 +1250,7 @@ function renderMySuggestions() {
     const date = new Date(s.time);
     const formattedTime = date.toLocaleDateString('en-IN', { 
       day: 'numeric', 
-      month: 'short', 
+      month: 'short',
       hour: '2-digit', 
       minute: '2-digit' 
     });
@@ -1270,21 +1263,6 @@ function renderMySuggestions() {
   });
   
   container.innerHTML = html;
-}
-function clearSuggestions() {
-  if (!confirm("Clear all suggestions?")) return;
-  saveSuggestions([]); renderSuggestions(); toast("Cleared");
-}
-
-function renderSuggestions() {
-  const suggs = getSuggestions();
-  if (!suggs.length) { $("sugg-list").innerHTML = '<div class="sugg-empty">No suggestions yet. Be the first! 🎵</div>'; return; }
-  $("sugg-list").innerHTML = suggs.map(s => `
-    <div class="sugg-item">
-      <div class="sugg-item-name">🎵 ${s.name}</div>
-      <div class="sugg-item-text">${s.text}</div>
-      <div class="sugg-item-time">${relTime(s.time)}</div>
-    </div>`).join("") + '<div style="height:16px"></div>';
 }
 
 /* ── GREETING ── */
