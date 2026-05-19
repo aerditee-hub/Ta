@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#000000">
-<title>TAN Music</title>
+<title>VIN Music</title>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
@@ -354,11 +354,20 @@ img{display:block}button{font-family:inherit}
     <div class="sugg-subtitle">Request a song · Suggest an idea</div>
   </div>
   <div class="sugg-form">
-    <div class="sugg-form-title">💡 Write a suggestion</div>
-    <input class="sugg-name-input" id="sugg-name" type="text" placeholder="Your name (optional)" maxlength="40" autocomplete="off">
-    <textarea class="sugg-text-input" id="sugg-text" placeholder="Suggest a song, artist, or anything else…" maxlength="200"></textarea>
-    <button class="sugg-submit" onclick="submitSuggestion()">Submit Suggestion</button>
-  </div>
+  <div class="sugg-form-title">💡 Write a suggestion</div>
+  
+  <form name="suggestions" method="POST" data-netlify="true" id="suggestion-form">
+    <input type="hidden" name="form-name" value="suggestions" />
+    
+    <input class="sugg-name-input" name="name" type="text" placeholder="Your name (optional)" maxlength="40">
+    <textarea class="sugg-text-input" name="message" placeholder="Suggest a song, artist, or anything else…" maxlength="500" required></textarea>
+    
+    <!-- Honeypot for spam protection (optional but recommended) -->
+    <input type="text" name="bot-field" style="display:none;" />
+    
+    <button class="sugg-submit" type="submit">Submit Suggestion</button>
+  </form>
+</div>
   <div class="sugg-list-head">
     <span class="sugg-list-title">All Suggestions</span>
     <button class="sugg-clear-btn" onclick="clearSuggestions()">Clear all</button>
@@ -1181,15 +1190,26 @@ function clearSearch(){$("search-input").value="";$("search-input").dispatchEven
 function getSuggestions() { try{return JSON.parse(localStorage.getItem("tanSuggestions")||"[]");}catch(e){return[];} }
 function saveSuggestions(arr) { try{localStorage.setItem("tanSuggestions",JSON.stringify(arr));}catch(e){} }
 
-function submitSuggestion() {
-  const name = $("sugg-name").value.trim() || "Anonymous";
-  const text = $("sugg-text").value.trim();
-  if (!text) { toast("Please write a suggestion first"); return; }
-  const suggs = getSuggestions();
-  suggs.unshift({ name, text, time: Date.now() });
-  saveSuggestions(suggs.slice(0, 100));
-  $("sugg-name").value = ""; $("sugg-text").value = "";
-  renderSuggestions(); toast("✅ Suggestion submitted!");
+async function submitSuggestion() {
+  const form = document.getElementById('suggestion-form');
+  const formData = new FormData(form);
+  
+  try {
+    const response = await fetch('/', {
+      method: 'POST',
+      body: formData
+    });
+    
+    if (response.ok) {
+      form.reset();
+      toast("✅ Suggestion submitted! Thank you!");
+      // Optionally show a success message
+    } else {
+      toast("Error submitting. Try again.");
+    }
+  } catch(e) {
+    toast("Error submitting. Check your connection.");
+  }
 }
 
 function clearSuggestions() {
