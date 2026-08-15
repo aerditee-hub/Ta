@@ -965,7 +965,7 @@ function playSong(id){
   S.nowId=id;S.playing=true;
   if(!S.shuffle){const i=SONGS.findIndex(x=>x.id===id);S.queue=[...SONGS.slice(i),...SONGS.slice(0,i)].map(x=>x.id);}
   aud.src=s.src;
-  aud.play().catch(()=>{S.playing=false;syncUI();toast("⚠️ Audio not found — check the src path");});
+  aud.play().catch(()=>{S.playing=false;syncUI();toast("Net Slow Hai Tumhara🥀🥀");});
   syncUI();
   S.recent=[id,...S.recent.filter(x=>x!==id)].slice(0,30);
   renderRecent();renderTypeSections();renderContinue();saveData();
